@@ -17,5 +17,5 @@
 
 
 #### 软件工程概论作业
-[APP下载](http://tangchuan.xyz/)
-[服务器，数据库部分](https://github.com/JLUtangchuan/server)
+ [APP下载](http://tangchuan.xyz/)
+ [服务器，数据库部分](https://github.com/JLUtangchuan/server)
