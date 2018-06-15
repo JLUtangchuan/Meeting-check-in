@@ -1,0 +1,230 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">创建会议</h1>
+		    <!--输入相关信息 然后 把信息发送到服务器   服务器接受后修改database -->
+		    <!-- 添加成员 -->
+		    <div class="mui-input-row">
+		        <label>会议名称</label>
+		        <input type="text" class="mui-input-clear mui-input-speech" placeholder="请输入会议名" id="metname">
+		    </div>
+		    
+		    <!--多行文本框-->
+		    <div class="mui-input-row" style="margin: 10px 5px;">
+				<textarea class="mui-input-speech" id="des" rows="5" placeholder="请输入会议简介"></textarea>
+			</div>
+		    <!-- 添加成员  多选框  成员应为同一公司的 -->
+		   
+		   
+		    <div class="mui-scalable">
+		   		选择会议成员
+		    </div>
+		    <div class="ul_list" id="ul_list">
+			   	
+		    </div>
+		    
+					    
+		    
+		    
+		    
+		    <div style="padding:15px;">
+		        <div id="">
+		        	设置会议签到时间
+		        </div>
+		        <button id='pickDateBtn' type="button" class="mui-btn">选择日期</button> 
+		        <button id='pickTimeBtn' type="button" class="mui-btn">选择时间</button>
+		    </div>
+		   
+		    <button type="button" class="mui-btn mui-btn-blue mui-btn-block" id="addbtn">添加会议</button>
+		</header>		
+		
+		<script src="js/mui.min.js"></script>
+		<script src="js/socket.io.js"></script>
+		<script type="text/javascript">
+			mui.init({
+				
+				
+			})
+		
+			// 语音
+			mui.ready(function() {
+				mui('.mui-input-row textarea').input();
+			});
+			
+		
+			
+			
+			function init(){
+				// 获取同一公司成员
+				// value = uid
+				var listBox = document.getElementById('ul_list');
+				var socket = io('http://123.206.78.216');
+//				var socket = io('http://10.151.212.163');
+				// 发送一个自己的uid
+				var myself = JSON.parse(localStorage.getItem('$uid') || '[]');
+				socket.emit('getuid',myself);
+				socket.on('getuid_return',function(data){
+					// 获取到的uid 数组
+					var uidlist = data.list;
+//					console.log(uidlist.length);
+					for(var i = 0 ; i < uidlist.length ; i++){
+						
+// 用户名== 真实姓名		
+						if(uidlist[i] == myself) continue;
+						
+						// DOM注入复选框按钮
+						var li = document.createElement('div');
+						li.className = "mui-input-row mui-checkbox";
+						li.innerHTML = "<label>"+ uidlist[i] + "</label><input class='checkli' name='checkbox1' value='" + uidlist[i] + "' type='checkbox'>";
+					   	listBox.appendChild(li);
+					}
+					
+					
+				});
+			}
+			
+			
+			init();
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			var myDate = new Date();
+			var metname = document.getElementById('metname');
+			var addbtn = document.getElementById('addbtn');
+			var des = document.getElementById('des');
+			
+			
+		
+			
+			addbtn.addEventListener('tap',function(ev){
+				
+				
+//				console.log(myDate)
+//   			获取选中的uid array
+				var arr = getCheckBoxRes('checkli');
+//				console.log(arr)
+				
+				// 发送消息
+				var socket = io('http://123.206.78.216');
+//				var socket = io('http://10.151.212.163');
+
+
+//				var socket = io('http://tangchuan.xyz');
+				// json 数组
+				var jsonmsg  = {
+					mname: metname.value,
+					uid:JSON.parse(localStorage.getItem('$uid') || '[]'),
+					des:des.value,
+					st:myDate,
+					arr:arr
+				}
+				socket.emit('addmeet',jsonmsg);
+				
+				// 返回到主页
+				plus.nativeUI.toast("成功添加会议" +  metname.value)
+				mui.openWindow({
+					id: 'main',
+					url: 'main.html',
+					show: {
+						aniShow: 'pop-in'
+					},
+					waiting: {
+						autoShow: false
+					}
+				})
+			});
+			
+			
+			
+			
+			//  日期
+			
+			document.getElementById("pickDateBtn").addEventListener('tap', function() {
+			    var dDate = new Date();
+			    //设置当前日期（不设置默认当前日期）
+			    dDate.setFullYear();
+			    var minDate = new Date();
+			    //最小时间
+			    minDate.setFullYear();
+			    var maxDate = new Date();
+			    //最大时间
+			    maxDate.setFullYear(2020);
+			    plus.nativeUI.pickDate(function(e) {
+			        var d = e.date;
+			        myDate.setFullYear(d.getFullYear());
+			       	myDate.setMonth(d.getMonth());
+			       	myDate.setDate(d.getDate());
+			       	
+			        mui.toast('您选择的日期是:' + d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate());
+			    }, function(e) {
+			        mui.toast("您没有选择日期");
+			    }, {
+			        title: '请选择日期',
+			        date: dDate,
+			        minDate: minDate,
+			        maxDate: maxDate
+			    });
+			});
+			document.getElementById("pickTimeBtn").addEventListener('tap', function() {
+			    var dTime = new Date();
+			    //设置默认时间
+			    dTime.setHours(6, 0);
+			    plus.nativeUI.pickTime(function(e) {
+			        var d = e.date;
+			        myDate.setHours(d.getHours());
+			        myDate.setMinutes(d.getMinutes());
+			        mui.toast("您选择的时间是：" + d.getHours() + ":" + d.getMinutes());
+			    }, function(e) {
+			        mui.toast("您没有选择时间");
+			    }, {
+			        title: "请选择时间",
+			        is24Hour: true,
+			        time: dTime
+			    });
+			});
+			
+			
+			
+			
+			//  获取复选框值函数
+			function getCheckBoxRes(className){
+			    var rdsObj   = document.getElementsByClassName(className);
+			    var checkVal = new Array();
+			    var k = 0;
+			    for(i = 0; i < rdsObj.length; i++){
+			        if(rdsObj[i].checked){
+			            checkVal[k] = rdsObj[i].value;
+			            k++;
+			        }
+			    }
+			    return checkVal;
+			}
+			
+			
+		</script>
+	</body>
+
+</html>

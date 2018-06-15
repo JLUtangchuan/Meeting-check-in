@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.qrbox{
+				width: 100px;
+				height: 100px;
+
+				margin: 0 auto;
+			}
+			#backtomain{
+				margin-top: 30px;
+				/*bottom: 30px;*/
+			}
+			.showinfo{
+				text-align: center;
+				height: 50px;
+				line-height: 50px;
+			}
+			#backtomain{
+				position: absolute;
+				bottom: 30px;
+			}
+		</style>
+		<script src="js/socket.io.js"></script>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/qrcode.js"></script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			    <h1 class="mui-title" id="mystate">签到</h1>
+		</header>
+		<div class="mui-content">
+			<!-- 显示信息   -->
+			<h2 id="mname" class="showinfo">
+				签到失败
+			</h2>
+			<div id="des" class="showinfo">
+				
+			</div>
+			<div id="st" class="showinfo">
+				
+			</div>
+			
+			<button type="button" class="mui-btn mui-btn-green mui-btn-block" id="backtomain">返回首页</button>
+		    <!--<a href="main.html" class="mui-btn mui-btn-blue mui-btn-block" >返回首页</a>-->
+		    
+		</div>
+	
+		
+		
+		
+		<script type="text/javascript">
+			
+			mui.init();
+			var self;
+			var mname = document.getElementById('mname');
+			var des = document.getElementById('des');
+			var st = document.getElementById('st');
+			var backtomain = document.getElementById('backtomain');
+//			var fwv = null;
+			
+			mui.plusReady(function () {
+				console.log('yemian')
+		        self = plus.webview.currentWebview();
+			  	// mui.alert(self.myurl)
+//			  	fwv = plus.webview.currentWebview();
+			  	var str = self.message;
+			  	
+//			  	plus.nativeUI.toast(self.message,2000);
+			  	
+			  	// webSocket
+			  	var socket = io('http://123.206.78.216');
+//				var socket = io('http://10.151.212.163');
+//			  	var socket = io('http://tangchuan.xyz/');
+//				console.log(str);
+			  	socket.emit('signin', { mid:self.message ,uid : JSON.parse(localStorage.getItem('$uid') || '[]')});
+			  	socket.on('signin_return',function(data){
+			  		// 获取会议信息
+			  		// 完成签到时间  会议签到时间  会议名称  会议简介 公司  管理人员
+//			  		console.log('socket')
+			  		if(data.err == 1){
+			  			// 出错
+//			  			plus.nativeUI.toast('出现错误',2000);
+			  			console.log('错误扫码')
+//			  			document.getElementById('mystate').innerHTML = '签到失败'
+						plus.nativeUI.toast("签到失败")
+			  		}else{
+			  			dat = new Date(data.st);
+			  			console.log('正确扫码')
+			  			mname.innerHTML = data.mname;
+				  		des.innerHTML = "会议简介:" + data.des;
+				  		st.innerHTML = "会议签到时间:" + dat.Format('yyyy-MM-dd hh:mm');
+				  		plus.nativeUI.toast("签到成功")
+			  		}
+			  		
+			  		
+			  		
+			  		
+			  	});
+			  	backtomain.addEventListener('tap',function(ev){
+			  		
+//			  		mname.innerHTML = "";
+//			  		des.innerHTML = "";
+//				  	st.innerHTML = "";
+//					fwv.close();
+					setTimeout(function(){
+						plus.webview.close(self);
+					},1000)
+			  		toMain();
+					
+			  	});
+				var toMain = function() {
+					
+					setTimeout(function() {
+//							mui.back();
+//						fwv.close();
+						mui.openWindow({
+							id: 'main',
+							url: 'main.html',
+							show: {
+								aniShow: 'pop-in'
+							},
+							waiting: {
+								autoShow: false
+							}
+						});
+					}, 100);
+				};
+			
+				
+		    });
+
+			 // 日期
+		    Date.prototype.Format = function(fmt) { //author: meizz 
+			    var o = {
+			        "M+": this.getMonth() + 1, //月份 
+			        "d+": this.getDate(), //日 
+			        "h+": this.getHours(), //小时 
+			        "m+": this.getMinutes(), //分 
+			        "s+": this.getSeconds(), //秒 
+			        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+			        "S": this.getMilliseconds() //毫秒 
+			    };
+			    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+			    for (var k in o)
+			        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+			    return fmt;
+			}
+			
+	    	
+		</script>
+	</body>
+
+</html>

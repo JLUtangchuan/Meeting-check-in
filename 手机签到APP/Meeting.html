@@ -1,0 +1,283 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.qrbox{
+				margin: 30px auto;
+				width: 300px;
+				height: 300px;
+			}
+			#qrcode{
+				width: 300px;
+				height: 300px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--会议详情-->
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title" id="meetingname"></h1>
+		</header>
+		
+		<div class="mui-content">
+		    <!--显示会议签到用的二维码-->
+		    <div class="qrbox">
+		    	<div id="qrcode"></div>
+		    </div>
+		    
+		    <!--显示会议其他信息-->
+		    
+		   
+		    <div class="des" id="des" style="margin: 20px;">
+		    	
+		    </div>
+		    <div class="comp" id="comp" style="margin: 20px;">
+		    	
+		    </div>
+		    <div class="st" id="st"  style="margin: 20px;">
+		    	
+		    </div>
+		   <!--  显示签到统计   获取attebd  mid 的所有信息      计算比例  绘制表格  -->
+		   	<div id="stat" style="margin: 20px;">
+		   		
+		   	</div>
+		   	<div id="chart" style="width: 100%;height: 300px;">
+		   		
+		   	</div>
+		   	<div style="margin-bottom: 100px;">
+		   		<div id="" style="margin: 20px;">
+		   			详细信息
+		   		</div>
+		   		<ul class="mui-table-view" id="eachbox">
+		   		        
+		   		</ul>
+		   		
+		   	</div>
+		   <!-- 添加删除会议按钮 -->
+		   <button type="button" class="mui-btn mui-btn-red mui-btn-block" id="delbtn">删除会议</button>
+		</div>
+		
+		<script src="js/echarts-all.js"></script>
+		<script src="js/qrcode.js"></script>
+		<script src="js/mui.min.js"></script>
+		<script src="js/socket.io.js"></script>
+		<script src="js/echarts.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			mui.init();
+			var meetname = document.getElementById('meetingname');
+			var des = document.getElementById('des');
+			var st = document.getElementById('st');
+			var comp = document.getElementById('comp');
+			var stat = document.getElementById('stat');
+			var eachbox = document.getElementById('eachbox');
+			var delbtn = document.getElementById('delbtn');
+			var chart = document.getElementById('chart');
+			
+			// 图标
+			
+			
+			var self;
+			var info;
+			var qrcode = new QRCode(document.getElementById("qrcode"), {
+				width : 300,
+				height : 300
+			});
+			function makeCode (elText) {			
+				qrcode.makeCode(elText);
+			}
+			mui.plusReady(function () {
+		        self = plus.webview.currentWebview();
+			  	
+//			  	var str = self.mid;
+			  	
+//			  	console.log(self.tname)
+//				console.log(self.mid);
+				info = self.mid;
+			  	makeCode(info.toString());
+			  	meetname.innerHTML = self.tname;
+			  	des.innerHTML =  "会议信息：" + self.des;
+			  	var mydate = new Date(self.st);
+			  	st.innerHTML = "签到时间：" + mydate.Format("yyyy-MM-dd hh:mm");
+			  	comp.innerHTML =  "公司/组织：" + self.comp;
+//			  	plus.nativeUI.toast(self.tname,1000);
+			  	
+//			  	// webSocket
+//				var socket = io('http://10.151.212.163');
+//			  	var socket = io('http://tangchuan.xyz/');
+				var socket = io('http://123.206.78.216');
+			  	socket.emit('meetinginfo', { mid:self.mid,st:self.st});
+				socket.on('meetinginfo_return', function (data) {
+					stat.innerHTML = `总人数:${data.len}人 ,  已签到人数:${data.count}人`;
+					
+	
+					// 注入标签
+					var stDate = new Date(self.st);
+					var a1 = 0,a2 = 0,a3 = 0;
+					for(var i = 0 ; i < data.arr.length ; i ++){
+						var li = document.createElement('li');
+						li.className = 'mui-table-view-cell mui-collapse';
+						var str = "";
+						if(data.arr[i].at != null){  // 表示已经签到的
+							var dat = new Date(data.arr[i].at);
+							if(data.arr[i].diff > 0){
+								// 迟到
+								a1++;
+								str = "<a class='mui-navigate-right' id="+ i +"> " +data.arr[i].uid + "</a><div class='mui-collapse-content'><p>签到时间: " + dat.Format("yyyy-MM-dd hh:mm") + "</p><p>迟到  : " + data.arr[i].diff + "分钟</p></div>";
+								// li.innerHTML = "<a class='mui-navigate-right' id="+ i +">" + data.arr[i].uid + "   签到时间: " + dat.Format("yyyy-MM-dd hh:mm") + " 迟到 " + data.arr[i].diff + "分钟 " + " </a>";
+							}else{
+								a2++;
+								// 未迟到
+								str = "<a class='mui-navigate-right' id="+ i +"> " +data.arr[i].uid + "</a><div class='mui-collapse-content'><p>签到时间: " + dat.Format("yyyy-MM-dd hh:mm") + "</p><p> 未迟到  : " + "" + "</p></div>";
+								//li.innerHTML = "<a class='mui-navigate-right' id="+ i +">" + data.arr[i].uid + "   签到时间: " + dat.Format("yyyy-MM-dd hh:mm")  + " </a>";
+							}
+						}else{
+							a3++;
+							// 未签到
+							str = "<a class='mui-navigate-right' id="+ i +"> " +data.arr[i].uid + "</a><div class='mui-collapse-content'><p>未签到 " + "" + "</p></div>";
+							//li.innerHTML = "<a class='mui-navigate-right' id="+ i +">" + data.arr[i].uid + "   未签到" + " </a>";
+						}
+						li.innerHTML = str;
+						eachbox.appendChild(li);
+					}
+					
+					
+					
+									/////////////////
+					option = {
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    legend: {
+        orient : 'vertical',
+        x : 'left',
+        data:['已签到（未迟到）','迟到','未签到']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: false},
+            dataView : {show: true, readOnly: false},
+            magicType : {
+                show: false, 
+                type: ['pie', 'funnel'],
+                option: {
+                    funnel: {
+                        x: '25%',
+                        width: '50%',
+                        funnelAlign: 'center',
+                        max: 1548
+                    }
+                }
+            },
+            restore : {show: false},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    series : [
+        {
+            name:'签到统计',
+            type:'pie',
+            radius : ['50%', '70%'],
+            itemStyle : {
+                normal : {
+                    label : {
+                        show : false
+                    },
+                    labelLine : {
+                        show : false
+                    }
+                },
+                emphasis : {
+                    label : {
+                        show : true,
+                        position : 'center',
+                        textStyle : {
+                            fontSize : '30',
+                            fontWeight : 'bold'
+                        }
+                    }
+                }
+            },
+            data:[
+                {value:a2, name:'已签到（未迟到）'},
+                {value:a3, name:'未签到'},
+                {value:a1, name:'迟到'}
+            ]
+        }
+    ]
+};
+					
+					
+					
+					
+					
+					
+					
+					////////////////
+					var myChart = echarts.init(chart);
+					myChart.setOption(option);
+					
+					
+					
+				});
+		    });
+		    
+		    delbtn.addEventListener('tap',function(){
+		    	// 发送mid 给后台
+		    	var socket = io('http://123.206.78.216');
+//				var socket = io('http://10.151.212.163');
+		    	socket.emit('delmeeting',{mid:info});
+		    	
+		    	
+		    	mui.back();
+//		    	mui.openWindow({
+//		    		id:'main',
+//		    		url:'main.html',
+//		    		show: {
+//						aniShow: 'pop-in'
+//					}
+//		    	})
+		    })
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    
+		    // 日期
+		    Date.prototype.Format = function(fmt) { //author: meizz 
+			    var o = {
+			        "M+": this.getMonth() + 1, //月份 
+			        "d+": this.getDate(), //日 
+			        "h+": this.getHours(), //小时 
+			        "m+": this.getMinutes(), //分 
+			        "s+": this.getSeconds(), //秒 
+			        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+			        "S": this.getMilliseconds() //毫秒 
+			    };
+			    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+			    for (var k in o)
+			        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+			    return fmt;
+			}
+		</script>
+	</body>
+
+</html>

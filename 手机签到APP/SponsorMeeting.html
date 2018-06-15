@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.add-meeting {
+				width: 44px;
+				height: 44px;
+				/*background: url('./images/iconfont-tianjia.png') no-repeat;
+				background-size:44px 44px;*/
+			}
+			
+			.add-meeting img {
+				width: 20px;
+				height: 20px;
+			}
+		</style>
+
+		<body>
+			<!--本页为发起会议项-->
+			<!-- 可以查看已经发起的会议 -->
+			<!-- 新建会议链接  -->
+			<!-- 返回按钮 -->
+			<header class="mui-bar mui-bar-nav">
+				<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+				<h1 class="mui-title">发起的会议</h1>
+				<a class="mui-icon mui-icon-right-nav mui-pull-right add-meeting" id="addmeeting">
+					<img src="img/newplus.png" />
+				</a>
+			</header>
+			<div class="mui-content">
+				<!-- pullrefresh -->
+			</div>
+			<script src="js/mui.min.js"></script>
+			<script src="js/mui.enterfocus.js"></script>
+			<script src="js/app.js"></script>
+			<script type="text/javascript">
+				mui.init();
+				var subpages = ['pullrefresh.html'];
+		      	var subpage_style = {
+				    top: '45px'
+//				    bottom: '51px'
+				}; 
+				var am = document.getElementById('addmeeting');
+				mui.plusReady(function(){
+					var self = plus.webview.currentWebview();
+					var sub = plus.webview.create(subpages[0],subpages[0],subpage_style);
+					self.append(sub);
+				});
+				am.addEventListener('tap', function(event) {
+//									$.fire(SponsorPage, 'show', null);
+									mui.openWindow({
+										id: 'addPage',
+										url: 'addPage.html',
+										extras:{
+											
+										}
+									});
+								
+							})
+			</script>
+		</body>
+
+</html>

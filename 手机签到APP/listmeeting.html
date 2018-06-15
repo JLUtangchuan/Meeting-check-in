@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+	</head>
+
+	<body>
+		<!-- 本页面用于展示 -->
+		<header class="mui-bar mui-bar-nav">
+		    <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		    <h1 class="mui-title">参与的会议</h1>
+		</header>
+		
+		<div class="mui-content" style="padding-top: 30px;">
+			<ul class="mui-table-view" id="listbox">
+			    
+			    
+			</ul>
+		    
+		</div>
+		
+		<script src="js/mui.min.js"></script>
+		<script src="js/socket.io.js"></script>
+		<script type="text/javascript">
+			mui.init()
+			var listBox = document.getElementById('listbox');
+			var socket = io('http://123.206.78.216');
+			
+			var myself = JSON.parse(localStorage.getItem('$uid') || '[]');
+			
+			socket.emit('listmeeting',{uid:myself});
+			socket.on('listmeeting_return',function(data){
+//					// 获取到的uid 数组
+				var meetlist = data.listmeet;
+//				console.log(meetlist)
+				for(var i = 0 ; i < meetlist.length ; i++){		
+					var stDate = new Date(meetlist[i].st).Format('yyyy-MM-dd hh:mm');
+					// DOM注入复选框按钮
+					var li = document.createElement('li');
+					li.className = "mui-table-view-cell mui-collapse";
+					str = "<a class='mui-navigate-right' href='#'> " + meetlist[i].name + "</a><div class='mui-collapse-content'><p>会议简介: " + meetlist[i].des + "</p><p>会议时间 : " + stDate + "</p><p>签到人员: " + meetlist[i].uid + "</p></div>";
+				   	li.innerHTML = str;
+				   	listBox.appendChild(li);
+				} 
+			}); 
+			
+			
+			
+			 // 日期
+		    Date.prototype.Format = function(fmt) { //author: meizz 
+			    var o = {
+			        "M+": this.getMonth() + 1, //月份 
+			        "d+": this.getDate(), //日 
+			        "h+": this.getHours(), //小时 
+			        "m+": this.getMinutes(), //分 
+			        "s+": this.getSeconds(), //秒 
+			        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+			        "S": this.getMilliseconds() //毫秒 
+			    };
+			    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+			    for (var k in o)
+			        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+			    return fmt;
+			}
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+			.mui-btn {
+				font-size: 20px;
+				width: 40%;
+				height: 50px;
+				text-align: center;
+				padding: 0 30px;
+				display: block;
+				margin: 0 auto;
+				margin-top: 30px;
+			}
+			.retrun-user {
+				width: 44px;
+				height: 44px;
+				/*background: url('./images/iconfont-tianjia.png') no-repeat;
+				background-size:44px 44px;*/
+			}
+			
+			.retrun-user img {
+				width: 25px;
+				height: 25px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--主页面  登录后跳转于此-->
+		<!-- 头部  主界面 -->
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">主界面</h1>
+			<a class="mui-icon mui-icon-right-nav mui-pull-right retrun-user" id="returnuser">
+				<img src="images/user-photo.png"/>
+			</a>
+		</header>
+		<!-- 主体   包含 我要签到  我是签到人两个链接 -->
+		<!--轮播图  -->
+		<div class="mui-content">
+			<div id="slider" class="mui-slider">
+
+				<div class="mui-slider-group mui-slider-loop">
+					<!-- 额外增加的一个节点(循环轮播：第一个节点是最后一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<a href="#">
+							<img src="img/slider1.jpg">
+						</a>
+					</div>
+					<!-- 第一张 -->
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="img/slider1.jpg">
+						</a>
+					</div>
+					<!-- 第二张 -->
+					<div class="mui-slider-item">
+						<a href="#">
+							<img src="img/slider1.jpg">
+						</a>
+					</div>
+					<!-- 额外增加的一个节点(循环轮播：最后一个节点是第一张轮播) -->
+					<div class="mui-slider-item mui-slider-item-duplicate">
+						<a href="#">
+							<img src="img/slider1.jpg">
+						</a>
+					</div>
+				</div>
+
+			</div>
+			<button type="button" class="mui-btn mui-btn-blue" id="btn01">发起的会议</button>
+			<button type="button" class="mui-btn mui-btn-green" id="btn03">参与的会议</button>
+			<button type="button" class="mui-btn mui-btn-red" id="btn02">扫码签到</button>
+		</div>
+
+		<script src="js/mui.min.js"></script>
+		<script src="js/mui.enterfocus.js"></script>
+		<script src="js/app.js"></script>
+		<script type="text/javascript">
+			(function($, doc) {
+					mui.init();
+//					plus.nativeUI.toast('msssage',2000);
+					$.plusReady(function() {
+							
+//							var saomaPage = $.preload({
+//								"id": 'saoma',
+//								"url": 'saoma.html'
+//							});
+//							var SponsorPage = $.preload({
+//								"id": 'SponsorMeeting',
+//								"url": 'SponsorMeeting.html'
+//							});
+							var toSaoma = function() {
+//								console.log('点击')
+								
+//								$.fire(saomaPage, 'show', null);
+//								mui.back();
+//								setTimeout(function(){
+//								   mui.back();
+//								}, 1400)
+								var saomaPage = $.preload({
+									"id": 'saoma',
+									"url": 'saoma.html'
+								});
+								setTimeout(function() {
+									
+									$.openWindow({
+										id: 'saoma'
+//										url: 'saoma.html',
+//										show: {
+//											aniShow: 'pop-in'
+//										},
+//										waiting: {
+//											autoShow: false
+//										}
+									});
+								}, 300);
+								
+								
+							};
+							var btnsaoma = doc.getElementById('btn02');
+							var btnSponsor = document.getElementById('btn01');
+							var listmeetingbtn = doc.getElementById('btn03');
+							var returnuser = document.getElementById('returnuser');
+							returnuser.addEventListener('tap',function(ev){
+								$.openWindow({
+										id: 'login',
+										url: 'login.html',
+										show: {
+											aniShow: 'pop-in'
+										},
+										waiting: {
+											autoShow: false
+										}
+									});
+							})
+							btnsaoma.addEventListener('tap', function(event) {
+								
+								toSaoma();
+							});
+							btnSponsor.addEventListener('tap', function(event) {
+//									$.fire(SponsorPage, 'show', null);
+//									console.log('点击')
+//									mui.back();
+									$.openWindow({
+										id: 'SponsorMeeting',
+										url: 'SponsorMeeting.html',
+										show: {
+											aniShow: 'pop-in'
+										},
+										waiting: {
+											autoShow: false
+										}
+									});
+								
+							});
+							listmeetingbtn.addEventListener('tap',function(ev){
+								$.openWindow({
+										id: 'listmeeting',
+										url: 'listmeeting.html',
+										show: {
+											aniShow: 'pop-in'
+										},
+										waiting: {
+											autoShow: false
+										}
+									});
+							});
+					});
+
+			}(mui, document));
+		</script>
+	</body>
+
+</html>
